@@ -1,0 +1,6 @@
+[submodule "annotables"]
+	path = annotables
+	url = https://github.com/stephenturner/annotables.git
+[submodule "Visualisation_R_scripts"]
+	path = Visualisation_R_scripts
+	url = https://github.com/tomdeman-bio/Visualisation_R_scripts.git

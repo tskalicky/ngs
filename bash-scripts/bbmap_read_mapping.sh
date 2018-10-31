@@ -13,8 +13,8 @@ module add samtools-1.6
 ### Variables
 OUTPUT_DIR="/storage/brno3-cerit/home/tskalicky/CUL13/mapping"
 GENOME="/storage/brno3-cerit/home/tskalicky/CUL13/genome_Kika_repaired/Pconfusum_genome_cleaned_final_NCBI_upload.fa"
-#RNASEQDIR="/storage/brno3-cerit/home/tskalicky/CUL13/RAW_Illumina/RNA-Seq/Cleaned_wo_H10_contamination"
-#DIFFEXPDIR="/storage/brno3-cerit/home/tskalicky/CUL13/RAW_Illumina/RNA-Seq/Differential_Expression/Filtered_reads_wo_H10_contamination_bbmap"
+RNASEQDIR="/storage/brno3-cerit/home/tskalicky/CUL13/RAW_Illumina/RNA-Seq/Cleaned_wo_H10_contamination"
+DIFFEXPDIR="/storage/brno3-cerit/home/tskalicky/CUL13/RAW_Illumina/RNA-Seq/Differential_Expression/Filtered_reads_wo_H10_contamination_bbmap"
 
 THREADS=$PBS_NUM_PPN
 APPENDIX=".tar.gz"
@@ -25,6 +25,7 @@ APPENDIX3=".sam"
 # clean the SCRATCH when job finishes (and data
 # are successfully copied out) or is killed
 # use cp -avr when copying directories
+cd $WORKDIR
 trap 'clean_scratch' TERM EXIT # sets up scratch cleaning in case an error occurs
 cp -av $GENOME $RNASEQDIR/*$APPENDIX $DIFFEXPDIR/*$APPENDIX $SCRATCHDIR
 cd $SCRATCHDIR
@@ -73,16 +74,16 @@ for c in *APPENDIX3
 do
 	READS3=$c
 	NAME3=${c%.*}
-	echo "Converting SAM to BAM file: $READS3"
+	echo "Converting SAM to BAM file: $READS"
 	samtools view -@ $THREADS -F 0x4 -b -u -t Pconfusum_genome_cleaned_final_NCBI_upload.fa.fai $READS3 | samtools sort --output-fmt BAM --threads $THREADS - -o $NAME3".sorted"
 	samtools index -b $NAME3".sorted"
 	samtools mpileup -u -f Pconfusum_genome_cleaned_final_NCBI_upload.fa.fai -P solexa -F 0.1 $NAME3".sorted" > $NAME3".pileup"
-	echo "Finnished conversion of SAM to BAM file: $READS3"
+	echo "Finnished conversion of SAM to BAM file: $READS"
 done
 ############################################################################################
 ### Copy data from scratch back to home dir and clean scratch
 mkdir -p $OUTPUT_DIR
-rm $SCRATCHDIR/*$APPENDIX $SCRATCHDIR/*$APPENDIX2 $SCRATCHDIR/samtools/*$APPENDIX3
+rm $SCRATCHDIR/*$APPENDIX $SCRATCHDIR/*APPENDIX2 $SCRATCHDIR/samtools/*APPENDIX3
 cp -avr $SCRATCHDIR $OUTPUT_DIR || export CLEAN_SCRATCH=false
 echo "Script finished on:"
 date +"%d/%m/%Y %H:%M:%S $HOSTNAME"
